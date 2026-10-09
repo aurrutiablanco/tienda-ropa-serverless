@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso — ModaUSDT</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%231a211e'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='Arial' font-weight='700' font-size='20' fill='white'%3EM%3C/text%3E%3C/svg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700&family=Geist:wght@400;600;700&family=Geist+Mono:wght@400&family=Playfair+Display:ital,wght@1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body data-page="acceso">
+
+    <div id="site-header"></div>
+
+    <main class="auth">
+        <section class="auth-panel dark" aria-labelledby="auth-title">
+            <p class="label label-lg">Mi cuenta</p>
+            <h1 class="display" id="auth-title">Bienvenido —</h1>
+            <p class="lead">Con tu cuenta tus datos se completan solos al confirmar un pedido.</p>
+        </section>
+
+        <section class="auth-main">
+            <div class="auth-box">
+
+                <!-- Visitante: login / registro -->
+                <div id="auth-guest">
+                    <div class="tabs" role="tablist" aria-label="Acceso">
+                        <button class="tab" type="button" role="tab" id="tab-login" aria-selected="true" aria-controls="form-login">Iniciar sesión</button>
+                        <button class="tab" type="button" role="tab" id="tab-registro" aria-selected="false" aria-controls="form-registro">Crear cuenta</button>
+                    </div>
+
+                    <form id="form-login" role="tabpanel" aria-labelledby="tab-login" novalidate>
+                        <div class="field">
+                            <label class="label" for="login-correo">Correo electrónico</label>
+                            <input class="input" type="email" id="login-correo" autocomplete="email" required placeholder="correo@ejemplo.com">
+                        </div>
+                        <div class="field">
+                            <label class="label" for="login-clave">Contraseña</label>
+                            <input class="input" type="password" id="login-clave" autocomplete="current-password" required placeholder="Tu contraseña">
+                        </div>
+                        <p class="form-msg" id="login-msg" role="alert"></p>
+                        <button class="btn btn-solid btn-block" type="submit" id="btn-login">Iniciar sesión</button>
+                    </form>
+
+                    <form id="form-registro" role="tabpanel" aria-labelledby="tab-registro" hidden novalidate>
+                        <div class="field">
+                            <label class="label" for="reg-nombre">Nombre completo</label>
+                            <input class="input" type="text" id="reg-nombre" autocomplete="name" required placeholder="Ej. Juan Pérez">
+                        </div>
+                        <div class="field">
+                            <label class="label" for="reg-correo">Correo electrónico</label>
+                            <input class="input" type="email" id="reg-correo" autocomplete="email" required placeholder="correo@ejemplo.com">
+                        </div>
+                        <div class="field">
+                            <label class="label" for="reg-clave">Contraseña</label>
+                            <input class="input" type="password" id="reg-clave" autocomplete="new-password" required minlength="6" placeholder="Mínimo 6 caracteres">
+                        </div>
+                        <p class="form-msg" id="reg-msg" role="alert"></p>
+                        <button class="btn btn-solid btn-block" type="submit" id="btn-registro">Crear cuenta</button>
+                    </form>
+                </div>
+
+                <!-- Usuario con sesión iniciada -->
+                <div id="auth-user" hidden>
+                    <div class="account-card">
+                        <p class="label muted">Sesión iniciada</p>
+                        <h2 class="h-md" id="user-name"></h2>
+                        <p class="muted" id="user-email"></p>
+                        <div class="account-actions">
+                            <a class="btn btn-solid" id="user-admin" href="admin.html" hidden>Ir al panel de administración</a>
+                            <a class="btn btn-outline" href="index.html#catalogo">Seguir comprando</a>
+                            <button class="btn btn-ghost" type="button" id="btn-logout">Cerrar sesión</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+    </main>
+
+    <div id="site-footer"></div>
+
+    <script src="js/common.js"></script>
+    <script src="js/acceso.js"></script>
+</body>
+</html>

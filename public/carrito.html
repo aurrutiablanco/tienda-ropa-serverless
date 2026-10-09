@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tu pedido — ModaUSDT</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%231a211e'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='Arial' font-weight='700' font-size='20' fill='white'%3EM%3C/text%3E%3C/svg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700&family=Geist:wght@400;600;700&family=Geist+Mono:wght@400&family=Playfair+Display:ital,wght@1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body data-page="carrito">
+
+    <div id="site-header"></div>
+
+    <main>
+        <div class="container page">
+            <header class="page-head">
+                <h1 class="h-lg">Tu pedido —</h1>
+                <p class="muted" id="cart-sub"></p>
+            </header>
+
+            <!-- Aviso de pedido directo -->
+            <div class="notice" id="direct-banner" hidden>
+                <span>Pedido directo: este pedido incluye solo la prenda que elegiste y no usa tu carrito.</span>
+                <a class="btn btn-ghost" href="carrito.html">Ver mi carrito</a>
+            </div>
+
+            <!-- Carrito vacío -->
+            <div class="empty" id="cart-empty" hidden>
+                <h2 class="h-md">Tu carrito está vacío.</h2>
+                <p>Explora el catálogo y agrega las prendas que te gusten.</p>
+                <a class="btn btn-solid" href="index.html#catalogo">Ver catálogo</a>
+            </div>
+
+            <!-- Factura + checkout -->
+            <div class="cart-layout" id="cart-layout" hidden>
+                <section class="invoice" aria-labelledby="invoice-title">
+                    <div class="invoice-head">
+                        <div class="meta">
+                            <p class="label" id="invoice-title">Factura proforma</p>
+                            <p class="mono" id="inv-client">Cliente: sin nombre</p>
+                        </div>
+                        <div class="meta">
+                            <p class="label">Fecha</p>
+                            <p class="mono" id="inv-date"></p>
+                        </div>
+                    </div>
+
+                    <table class="invoice-table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Producto</th>
+                                <th scope="col" class="num">Precio</th>
+                                <th scope="col" class="center">Cant.</th>
+                                <th scope="col" class="num">Subtotal</th>
+                                <th scope="col"><span class="sr-only">Quitar</span></th>
+                            </tr>
+                        </thead>
+                        <tbody id="inv-body"></tbody>
+                    </table>
+
+                    <div class="invoice-totals">
+                        <div class="total-row"><span>Artículos</span><span class="mono" id="tot-items">0</span></div>
+                        <div class="total-row"><span>Subtotal</span><span class="mono" id="tot-sub">$0.00</span></div>
+                        <div class="total-row"><span>Envío</span><span>A coordinar</span></div>
+                        <div class="total-row grand"><span>Total</span><strong id="tot-total">$0.00 USDT</strong></div>
+                    </div>
+                </section>
+
+                <aside class="checkout" aria-labelledby="checkout-title">
+                    <h2 class="h-md" id="checkout-title">Datos para la entrega</h2>
+                    <p class="muted small">Con estos datos generamos tu comprobante.</p>
+
+                    <form id="form-checkout" novalidate>
+                        <div class="field">
+                            <label class="label" for="cliente-nombre">Nombre completo</label>
+                            <input class="input" type="text" id="cliente-nombre" autocomplete="name" required placeholder="Ej. Juan Pérez">
+                        </div>
+                        <div class="field">
+                            <label class="label" for="cliente-correo">Correo electrónico</label>
+                            <input class="input" type="email" id="cliente-correo" autocomplete="email" required placeholder="correo@ejemplo.com">
+                        </div>
+                        <div class="field">
+                            <label class="label" for="cliente-telefono">Teléfono / WhatsApp</label>
+                            <input class="input" type="tel" id="cliente-telefono" autocomplete="tel" required placeholder="Ej. 04120000000">
+                        </div>
+                        <p class="form-msg" id="checkout-msg" role="alert"></p>
+                        <button class="btn btn-solid btn-block" type="submit" id="btn-procesar">Confirmar pedido</button>
+                        <p class="fine">Recibirás el comprobante en PDF en tu correo y coordinamos el pago por WhatsApp.</p>
+                    </form>
+                    <p class="fine" id="login-hint" hidden>
+                        ¿Ya tienes cuenta? <a class="label" style="text-decoration:underline;text-underline-offset:4px" href="acceso.html?redirect=carrito.html">Inicia sesión</a> para autocompletar tus datos.
+                    </p>
+                </aside>
+            </div>
+        </div>
+    </main>
+
+    <!-- Confirmación del pedido -->
+    <div class="modal" id="modal-confirmacion" role="dialog" aria-modal="true" aria-labelledby="conf-title">
+        <div class="modal-content">
+            <button class="modal-close" type="button" data-close-modal aria-label="Cerrar"><span id="conf-close-icon"></span></button>
+            <h2 class="h-md" id="conf-title">Pedido confirmado</h2>
+            <p class="muted">Enviamos el comprobante en PDF a tu correo. Para el pago y el envío, escríbenos por WhatsApp.</p>
+            <dl class="modal-summary">
+                <div><dt>Pedido</dt><dd class="mono" id="conf-id">#0</dd></div>
+                <div><dt>Total</dt><dd id="conf-total">$0.00 USDT</dd></div>
+            </dl>
+            <div class="modal-actions">
+                <a class="btn btn-solid" id="conf-whatsapp" href="#" target="_blank" rel="noopener">Coordinar pago por WhatsApp</a>
+                <a class="btn btn-outline" href="index.html#catalogo">Seguir comprando</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="site-footer"></div>
+
+    <script src="js/common.js"></script>
+    <script src="js/carrito.js"></script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Producto — ModaUSDT</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%231a211e'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='Arial' font-weight='700' font-size='20' fill='white'%3EM%3C/text%3E%3C/svg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700&family=Geist:wght@400;600;700&family=Geist+Mono:wght@400&family=Playfair+Display:ital,wght@1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body data-page="producto">
+
+    <div id="site-header"></div>
+
+    <main>
+        <div class="container page" id="product-root" aria-live="polite">
+            <!-- La ficha se renderiza desde js/producto.js -->
+        </div>
+
+        <section class="section" id="related-section" hidden aria-labelledby="related-title">
+            <div class="container">
+                <div class="section-head">
+                    <h2 class="h-lg" id="related-title">También te puede gustar —</h2>
+                </div>
+                <div class="grid" id="related-grid"></div>
+            </div>
+        </section>
+    </main>
+
+    <div id="site-footer"></div>
+
+    <script src="js/common.js"></script>
+    <script src="js/producto.js"></script>
+</body>
+</html>
