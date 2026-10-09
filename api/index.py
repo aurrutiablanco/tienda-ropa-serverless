@@ -20,15 +20,27 @@ CORS(app)
 # -----------------------------------------------------------------------------
 # MIDDLEWARE PARA PRESERVAR RUTAS REALES EN VERCEL SERVERLESS
 # -----------------------------------------------------------------------------
+from urllib.parse import parse_qsl, urlencode
+
 class VercelPathFix:
     def __init__(self, app):
         self.app = app
 
     def __call__(self, environ, start_response):
-        raw_uri = environ.get('HTTP_X_FORWARDED_URI') or environ.get('RAW_URI') or environ.get('HTTP_X_MATCHED_PATH')
-        if raw_uri and raw_uri != '/api/index.py':
-            path_info = raw_uri.split('?')[0]
-            environ['PATH_INFO'] = path_info
+        qs = environ.get("QUERY_STRING", "")
+        params = parse_qsl(qs, keep_blank_values=True)
+        real_path = None
+        resto = []
+        for k, v in params:
+            if k == "__path":
+                real_path = v
+            else:
+                resto.append((k, v))
+
+        if real_path is not None:
+            environ["PATH_INFO"] = "/api/" + real_path.strip("/")
+            environ["QUERY_STRING"] = urlencode(resto)
+
         return self.app(environ, start_response)
 
 app.wsgi_app = VercelPathFix(app.wsgi_app)
