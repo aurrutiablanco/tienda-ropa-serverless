@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tienda de Ropa - Catálogo Móvil</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <!-- Header Principal -->
+    <header class="navbar">
+        <div class="navbar-container">
+            <a href="index.html" class="brand-logo">👗 ModaUSDT</a>
+            <div class="search-bar">
+                <input type="text" id="input-busqueda" placeholder="Buscar ropa, color, talla...">
+                <button id="btn-buscar">🔍</button>
+            </div>
+            <div class="nav-actions">
+                <button id="btn-modal-auth" class="btn-icon" title="Mi Cuenta">👤 <span id="lbl-usuario">Ingresar</span></button>
+                <button id="btn-modal-cart" class="btn-icon btn-cart" title="Carrito">
+                    🛒 <span id="cart-counter" class="cart-badge">0</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Barra de Categorías -->
+    <nav class="categories-bar">
+        <div class="categories-container" id="contenedor-categorias">
+            <button class="cat-chip active" data-cat="">Todas</button>
+            <!-- Las categorías se cargarán dinámicamente -->
+        </div>
+    </nav>
+
+    <!-- Banner Promocional -->
+    <section class="hero-banner">
+        <h2>Nueva Colección de Ropa</h2>
+        <p>Precios exclusivos en USDT | Envíos a todo el país</p>
+    </section>
+
+    <!-- Catálogo de Productos -->
+    <main class="main-container">
+        <div class="section-title">
+            <h3 id="titulo-seccion">Catálogo de Productos</h3>
+            <span id="total-productos-count" class="badge-count">0 productos</span>
+        </div>
+
+        <div id="loader" class="loader">Cargando productos...</div>
+        <div id="grid-productos" class="products-grid">
+            <!-- Tarjetas de productos inyectadas por JS -->
+        </div>
+    </main>
+
+    <!-- MODAL: DETALLE DE PRODUCTO -->
+    <div id="modal-producto" class="modal">
+        <div class="modal-content">
+            <button class="close-modal" id="close-modal-producto">&times;</button>
+            <div class="modal-body-product">
+                <div class="product-img-box">
+                    <img id="det-img" src="" alt="Producto">
+                </div>
+                <div class="product-info-box">
+                    <span id="det-categoria" class="badge-cat">Categoría</span>
+                    <h2 id="det-nombre">Nombre del Producto</h2>
+                    <p id="det-descripcion" class="product-desc"></p>
+                    
+                    <div class="product-specs">
+                        <div class="spec-item"><strong>Color:</strong> <span id="det-color">-</span></div>
+                        <div class="spec-item"><strong>Talla:</strong> <span id="det-talla">-</span></div>
+                    </div>
+
+                    <div class="price-box">
+                        <span class="price-label">Precio:</span>
+                        <span id="det-precio" class="price-value">$0.00 USDT</span>
+                    </div>
+
+                    <div class="quantity-selector">
+                        <label for="det-cantidad">Cantidad:</label>
+                        <input type="number" id="det-cantidad" value="1" min="1" max="99">
+                    </div>
+
+                    <button id="btn-add-cart-detail" class="btn-primary btn-block">Agregar al Carrito 🛒</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: CARRITO DE COMPRAS Y CHECKOUT -->
+    <div id="modal-carrito" class="modal">
+        <div class="modal-content modal-lg">
+            <button class="close-modal" id="close-modal-carrito">&times;</button>
+            <h2>Tu Carrito de Compras</h2>
+
+            <div id="cart-empty-msg" class="empty-msg">Tu carrito está vacío.</div>
+
+            <div id="cart-content-wrapper" class="cart-wrapper hidden">
+                <div id="cart-items-list" class="cart-items-list">
+                    <!-- Items del carrito por JS -->
+                </div>
+
+                <div class="cart-summary">
+                    <div class="summary-line total-line">
+                        <span>Total:</span>
+                        <strong id="cart-total-usdt">$0.00 USDT</strong>
+                    </div>
+
+                    <hr>
+
+                    <h3>Datos para la Entrega</h3>
+                    <form id="form-checkout" class="checkout-form">
+                        <div class="form-group">
+                            <label for="cliente-nombre">Nombre Completo *</label>
+                            <input type="text" id="cliente-nombre" required placeholder="Ej. Juan Pérez">
+                        </div>
+                        <div class="form-group">
+                            <label for="cliente-correo">Correo Electrónico *</label>
+                            <input type="email" id="cliente-correo" required placeholder="ejemplo@correo.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="cliente-telefono">Teléfono / WhatsApp *</label>
+                            <input type="tel" id="cliente-telefono" required placeholder="Ej. 04120000000">
+                        </div>
+
+                        <button type="submit" id="btn-procesar-pedido" class="btn-success btn-block">Procesar Pedido y Enviar a Correo 📩</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: INICIO DE SESIÓN / REGISTRO -->
+    <div id="modal-auth" class="modal">
+        <div class="modal-content modal-sm">
+            <button class="close-modal" id="close-modal-auth">&times;</button>
+            
+            <div class="auth-tabs">
+                <button id="tab-login" class="tab-btn active">Iniciar Sesión</button>
+                <button id="tab-registro" class="tab-btn">Registrarse</button>
+            </div>
+
+            <!-- Formulario Login -->
+            <form id="form-login" class="auth-form">
+                <div class="form-group">
+                    <label for="login-correo">Correo Electrónico</label>
+                    <input type="email" id="login-correo" required placeholder="correo@ejemplo.com">
+                </div>
+                <div class="form-group">
+                    <label for="login-clave">Contraseña</label>
+                    <input type="password" id="login-clave" required placeholder="******">
+                </div>
+                <button type="submit" class="btn-primary btn-block">Entrar</button>
+            </form>
+
+            <!-- Formulario Registro -->
+            <form id="form-registro" class="auth-form hidden">
+                <div class="form-group">
+                    <label for="reg-nombre">Nombre Completo</label>
+                    <input type="text" id="reg-nombre" required placeholder="Tu nombre">
+                </div>
+                <div class="form-group">
+                    <label for="reg-correo">Correo Electrónico</label>
+                    <input type="email" id="reg-correo" required placeholder="correo@ejemplo.com">
+                </div>
+                <div class="form-group">
+                    <label for="reg-clave">Contraseña</label>
+                    <input type="password" id="reg-clave" required placeholder="******">
+                </div>
+                <button type="submit" class="btn-primary btn-block">Crear Cuenta</button>
+            </form>
+            
+            <div id="auth-mensaje" class="auth-msg"></div>
+        </div>
+    </div>
+
+    <!-- MODAL: CONFIRMACIÓN POST-COMPRA -->
+    <div id="modal-confirmacion" class="modal">
+        <div class="modal-content modal-sm text-center">
+            <div class="success-icon">🎉</div>
+            <h2>¡Pedido Realizado con Éxito!</h2>
+            <p>Se ha generado la orden <strong id="conf-id-pedido">#0</strong> por un monto de <strong id="conf-total">$0.00 USDT</strong>.</p>
+            <p class="muted-text">Hemos enviado el comprobante PDF a tu correo electrónico.</p>
+            
+            <a id="btn-whatsapp-confirm" href="#" target="_blank" class="btn-whatsapp btn-block">
+                Coordinar Pago por WhatsApp 💬
+            </a>
+            <button id="btn-cerrar-confirmacion" class="btn-secondary btn-block" style="margin-top: 10px;">Seguir Comprando</button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2026 ModaUSDT - Todos los derechos reservados.</p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>

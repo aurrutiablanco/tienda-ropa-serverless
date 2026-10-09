@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración - ModaUSDT</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .admin-table-container {
+            overflow-x: auto;
+            background: var(--card-bg);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+            margin-top: 16px;
+        }
+
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        .admin-table th, .admin-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .admin-table th {
+            background-color: #f8fafc;
+            font-weight: 700;
+            color: var(--text-color);
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .status-active {
+            background-color: #dcfce7;
+            color: var(--success-color);
+        }
+
+        .status-inactive {
+            background-color: #fee2e2;
+            color: var(--danger-color);
+        }
+
+        .actions-cell {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-sm {
+            padding: 6px 10px;
+            font-size: 0.8rem;
+        }
+
+        .btn-warning {
+            background-color: #d97706;
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .admin-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        .img-thumb {
+            width: 45px;
+            height: 45px;
+            object-fit: cover;
+            border-radius: var(--radius-sm);
+            background-color: #f1f5f9;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Panel Admin -->
+    <header class="navbar">
+        <div class="navbar-container">
+            <a href="index.html" class="brand-logo">👗 ModaUSDT <span style="font-size: 0.8rem; color: var(--text-muted);">(Admin)</span></a>
+            <div class="nav-actions">
+                <a href="index.html" class="btn-icon" style="text-decoration: none;">🛍️ Ver Tienda</a>
+                <button id="btn-logout-admin" class="btn-icon btn-danger">🚪 Cerrar Sesión</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Contenido Principal -->
+    <main class="main-container" style="margin-top: 24px;">
+        <div class="section-title">
+            <h2>Gestión del Inventario de Productos</h2>
+            <button id="btn-nuevo-producto" class="btn-primary">+ Crear Producto</button>
+        </div>
+
+        <!-- Filtros de búsqueda -->
+        <div class="admin-controls">
+            <div class="search-bar" style="max-width: 350px;">
+                <input type="text" id="admin-busqueda" placeholder="Buscar por nombre, color, talla...">
+            </div>
+            <select id="admin-filtro-categoria" style="padding: 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); font-weight: 600;">
+                <option value="">Todas las Categorías</option>
+            </select>
+        </div>
+
+        <!-- Mensaje de Carga -->
+        <div id="admin-loader" class="loader">Cargando catálogo completo...</div>
+
+        <!-- Tabla de Productos -->
+        <div class="admin-table-container">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Imagen</th>
+                        <th>Producto</th>
+                        <th>Categoría</th>
+                        <th>Precio (USDT)</th>
+                        <th>Color / Talla</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-productos-body">
+                    <!-- Filas generadas dinámicamente con JS -->
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- MODAL: CREAR / EDITAR PRODUCTO -->
+    <div id="modal-form-producto" class="modal">
+        <div class="modal-content modal-lg">
+            <button class="close-modal" id="close-modal-form">&times;</button>
+            <h2 id="modal-title-prod">Crear Nuevo Producto</h2>
+
+            <form id="form-producto" class="checkout-form" style="margin-top: 16px;">
+                <input type="hidden" id="prod-id">
+
+                <div class="form-group">
+                    <label for="prod-nombre">Nombre del Producto *</label>
+                    <input type="text" id="prod-nombre" required placeholder="Ej. Franela Oversize Cotton">
+                </div>
+
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <div class="form-group" style="flex: 1; min-width: 150px;">
+                        <label for="prod-precio">Precio (USDT) *</label>
+                        <input type="number" id="prod-precio" step="0.01" min="0.01" required placeholder="15.00">
+                    </div>
+
+                    <div class="form-group" style="flex: 1; min-width: 150px;">
+                        <label for="prod-categoria">Categoría *</label>
+                        <select id="prod-categoria" required style="padding: 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                            <!-- Opciones inyectadas dinámicamente -->
+                        </select>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <div class="form-group" style="flex: 1; min-width: 150px;">
+                        <label for="prod-color">Color *</label>
+                        <input type="text" id="prod-color" required placeholder="Ej. Negro">
+                    </div>
+
+                    <div class="form-group" style="flex: 1; min-width: 150px;">
+                        <label for="prod-talla">Talla *</label>
+                        <input type="text" id="prod-talla" required placeholder="Ej. M / L / XL">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="prod-imagen">URL de la Imagen</label>
+                    <input type="url" id="prod-imagen" placeholder="https://ejemplo.com/imagen.jpg">
+                </div>
+
+                <div class="form-group">
+                    <label for="prod-descripcion">Descripción</label>
+                    <textarea id="prod-descripcion" rows="3" style="padding: 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); font-family: inherit;" placeholder="Detalles de la prenda..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="prod-estado">Estado del Producto</label>
+                    <select id="prod-estado" style="padding: 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                        <option value="1">Disponible (Activo)</option>
+                        <option value="0">Agotado / Desactivado (Inactivo)</option>
+                    </select>
+                </div>
+
+                <div id="form-prod-mensaje" class="auth-msg"></div>
+
+                <button type="submit" id="btn-guardar-prod" class="btn-primary btn-block" style="margin-top: 10px;">Guardar Producto</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+</html>
