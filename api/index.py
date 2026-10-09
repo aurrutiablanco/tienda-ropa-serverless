@@ -17,6 +17,22 @@ load_dotenv()
 app = Flask(__name__)
 CORS(app)
 
+# -----------------------------------------------------------------------------
+# MIDDLEWARE PARA PRESERVAR RUTAS REALES EN VERCEL SERVERLESS
+# -----------------------------------------------------------------------------
+class VercelPathFix:
+    def __init__(self, app):
+        self.app = app
+
+    def __call__(self, environ, start_response):
+        raw_uri = environ.get('HTTP_X_FORWARDED_URI') or environ.get('RAW_URI') or environ.get('HTTP_X_MATCHED_PATH')
+        if raw_uri and raw_uri != '/api/index.py':
+            path_info = raw_uri.split('?')[0]
+            environ['PATH_INFO'] = path_info
+        return self.app(environ, start_response)
+
+app.wsgi_app = VercelPathFix(app.wsgi_app)
+
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "clave_secreta_para_tokens_jwt")
 
 # -----------------------------------------------------------------------------
@@ -29,7 +45,6 @@ def get_db():
     url = os.environ.get("TURSO_DATABASE_URL", DEFAULT_TURSO_URL)
     token = os.environ.get("TURSO_AUTH_TOKEN", DEFAULT_TURSO_TOKEN)
     
-    # Garantizar el protocolo https:// en entornos serverless
     if url.startswith("libsql://"):
         url = url.replace("libsql://", "https://")
         
@@ -43,13 +58,11 @@ def generar_pdf_pedido(id_pedido, cliente_nombre, cliente_correo, cliente_telefo
     pdf.add_page()
     pdf.set_font("Helvetica", "B", 16)
     
-    # Encabezado
     pdf.cell(0, 10, "COMPROBANTE DE PEDIDO", ln=True, align="C")
     pdf.set_font("Helvetica", "", 10)
     pdf.cell(0, 6, f"Pedido #: {id_pedido}", ln=True, align="C")
     pdf.ln(5)
     
-    # Datos del Cliente
     pdf.set_font("Helvetica", "B", 11)
     pdf.cell(0, 6, "Datos del Cliente:", ln=True)
     pdf.set_font("Helvetica", "", 10)
@@ -58,7 +71,6 @@ def generar_pdf_pedido(id_pedido, cliente_nombre, cliente_correo, cliente_telefo
     pdf.cell(0, 5, f"Telefono: {cliente_telefono}", ln=True)
     pdf.ln(5)
     
-    # Tabla de Productos
     pdf.set_font("Helvetica", "B", 10)
     pdf.cell(80, 7, "Producto", border=1)
     pdf.cell(25, 7, "Color", border=1)
@@ -89,7 +101,6 @@ def generar_pdf_pedido(id_pedido, cliente_nombre, cliente_correo, cliente_telefo
     pdf.set_font("Helvetica", "B", 12)
     pdf.cell(0, 8, f"TOTAL: ${total_usdt:.2f} USDT", ln=True, align="R")
     
-    # Retornar buffer en bytes
     pdf_output = pdf.output()
     if isinstance(pdf_output, (bytes, bytearray)):
         return bytes(pdf_output)
@@ -109,7 +120,6 @@ def enviar_notificaciones_correo(cliente_nombre, cliente_correo, cliente_telefon
         return False
 
     try:
-        # Correo al Cliente
         msg_cliente = MIMEMultipart()
         msg_cliente["From"] = smtp_email
         msg_cliente["To"] = cliente_correo
@@ -130,7 +140,6 @@ Para coordinar el pago y el envío, por favor ponte en contacto con nosotros ví
         adj_cliente.add_header("Content-Disposition", "attachment", filename=f"Pedido_{id_pedido}.pdf")
         msg_cliente.attach(adj_cliente)
 
-        # Correo al Administrador
         msg_admin = MIMEMultipart()
         msg_admin["From"] = smtp_email
         msg_admin["To"] = admin_email
@@ -152,7 +161,6 @@ Adjunto se encuentra la orden de pedido generada.
         adj_admin.add_header("Content-Disposition", "attachment", filename=f"Pedido_{id_pedido}.pdf")
         msg_admin.attach(adj_admin)
 
-        # Conexión SMTP en puerto 587 con TLS
         server = smtplib.SMTP(smtp_server, smtp_port)
         server.starttls()
         server.login(smtp_email, smtp_password)
@@ -193,7 +201,6 @@ def registro():
         db.execute("INSERT INTO usuarios (nombre, correo, clave_hash, rol) VALUES (?, ?, ?, 'cliente')",
                    [nombre, correo, clave_hash])
 
-        # Verificación explícita por correo para evitar errores de last_insert_rowid en serverless
         res = db.execute("SELECT id_usuario, nombre, correo, rol FROM usuarios WHERE correo = ?", [correo])
         row = res.rows[0]
         usuario = {"id_usuario": row[0], "nombre": row[1], "correo": row[2], "rol": row[3]}
@@ -412,7 +419,6 @@ def actualizar_producto(id_producto):
 def eliminar_producto_logico(id_producto):
     try:
         db = get_db()
-        # Borrado Lógico
         db.execute("UPDATE productos SET estado = 0 WHERE id_producto = ?", [id_producto])
         return jsonify({"exito": True, "mensaje": "Producto desactivado del catálogo"}), 200
     except Exception as e:
@@ -440,7 +446,6 @@ def checkout():
 
         db = get_db()
         
-        # Guardar Cabecera del Pedido
         db.execute("""
             INSERT INTO pedidos (id_usuario, cliente_nombre, cliente_correo, cliente_telefono, total_usdt)
             VALUES (?, ?, ?, ?, ?)
@@ -449,7 +454,6 @@ def checkout():
         res_p = db.execute("SELECT id_pedido FROM pedidos WHERE cliente_correo = ? ORDER BY id_pedido DESC LIMIT 1", [cliente_correo])
         id_pedido = res_p.rows[0][0]
 
-        # Guardar Detalles del Pedido
         for item in items:
             db.execute("""
                 INSERT INTO detalles_pedido (id_pedido, id_producto, cantidad, precio_unitario, color, talla)
@@ -463,13 +467,9 @@ def checkout():
                 item.get("talla", "")
             ])
 
-        # Generar PDF en Memoria RAM
         pdf_bytes = generar_pdf_pedido(id_pedido, cliente_nombre, cliente_correo, cliente_telefono, items, total_usdt)
-
-        # Enviar Notificaciones por Correo SMTP (Cliente y Administrador)
         enviar_notificaciones_correo(cliente_nombre, cliente_correo, cliente_telefono, id_pedido, total_usdt, pdf_bytes)
 
-        # Configurar URL de WhatsApp
         whatsapp_number = os.environ.get("WHATSAPP_NUMBER", "584120700903")
         mensaje_wa = f"Hola, acabo de realizar el Pedido #{id_pedido} a nombre de {cliente_nombre} por un total de ${total_usdt:.2f} USDT. Quisiera coordinar el pago."
         wa_link = f"https://wa.me/{whatsapp_number}?text={quote(mensaje_wa)}"
